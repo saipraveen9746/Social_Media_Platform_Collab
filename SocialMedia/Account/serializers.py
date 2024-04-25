@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from .validators import validate_password_complexity,validate_email,validate_username
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -19,3 +20,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user.image = validated_data['image']
         user.save()
         return user
+    
+    
+    
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # adding custom claims
+        token['username'] = user.username
+        token["email"] = user.email
+        return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+        data["username"] = user.username
+        data["email"] = user.email
+        return data
+
