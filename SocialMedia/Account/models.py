@@ -28,6 +28,8 @@ class CustomUser(AbstractBaseUser):
     image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    follower = models.ManyToManyField('self',related_name='following_profiles',blank=True,symmetrical=False)
+    following = models.ManyToManyField('self',related_name='follower_profiles',blank=True,symmetrical=False)
 
     objects = CustomUserManager()
 
@@ -42,8 +44,17 @@ class CustomUser(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+    def follower_count(self):   
+        return self.follower.count()
+    def follower_usernames(self):
+        return [user.username  for user in self.follower.all()]
+    def following_count(self):
+        return self.following.count()
+    def following_names(self):
+        return [user.username for user in self.following.all()]
+
 
     @property
     def is_staff(self):
         return self.is_admin
-
+        

@@ -3,7 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import *
+from .serializers import FollowerSerializer,UserRegistrationSerializer,UserTokenObtainPairSerializer
+from rest_framework import generics
+from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
@@ -50,3 +52,32 @@ class UserProfileAPIView(APIView):
             return Response({"status":1,"data":serializer.data}, status=status.HTTP_200_OK)
         except:
             return Response({"status":0,"data":"Something went wrpppppppong"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+class CreateFollower(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FollowerSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            user_id = self.kwargs.get("user_id")
+            profile_instance = get_object_or_404(CustomUser, id=user_id)
+
+            if profile_instance.follower.filter(id=request.user.id).exists():
+                profile_instance.follower.remove(request.user)
+                request.user.following.remove(profile_instance)
+                return Response({'status':1,'detail': 'Following removed successfully'}, status=status.HTTP_200_OK)
+            else:
+                profile_instance.follower.add(request.user)
+                request.user.following.add(profile_instance)
+                return Response({'status':1,'detail': 'Following added successfully'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'status':0,'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+

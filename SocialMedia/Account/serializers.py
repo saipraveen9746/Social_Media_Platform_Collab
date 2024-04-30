@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from .validators import validate_password_complexity,validate_email,validate_username
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import CustomUser
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -40,3 +41,10 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["email"] = user.email
         return data
 
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= CustomUser
+        fields=[]
+
+
+        
