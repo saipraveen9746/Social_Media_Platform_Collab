@@ -7,6 +7,6 @@ urlpatterns = [
     path('login/', views.UserloginView.as_view()),
     path('user-profile/', views.UserProfileAPIView.as_view(),),
     path('CreateFollower/<int:user_id>/', views.CreateFollower.as_view(),name='CreateFollower'),
-
+    path('authenticated-user-profile/', views.UserProfileAPIView.as_view(),),
     
 ]
