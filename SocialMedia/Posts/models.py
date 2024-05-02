@@ -11,7 +11,7 @@ class Post(models.Model):
     liked_by = models.ManyToManyField(CustomUser, related_name='liked_posts', through='Like')
 
     def __str__(self):
-        return f"Post by {self.author.username} at {self.created_at}"
+        return f"Post by {self.author.username} at {self.created_at} :id:{self.id}"
     
     
     
