@@ -4,19 +4,41 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
 
+
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
+
+
 class AuthenticatedUserPostListView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         try:
-            appointments = Post.objects.filter(author=request.user)
+            posts = Post.objects.filter(author=request.user).order_by('-created_at')
             
-            serializer = AuthenticatedUserPostListSerializer(appointments, many=True)
+            serializer = PostListSerializer(posts, many=True,context={'request': request},)
             
             return Response({"status":1,"data":serializer.data}, status=status.HTTP_200_OK)
-        except:
-            return Response({"status":0,"error":"Something went wrong"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"status": 0, "errors": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+        
+        
+class Feed(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        try:
+            following_users = request.user.following.all()
+            follower_users = request.user.follower.all()
+            
+            relevant_users = following_users.union(follower_users).values('id')
+            print(following_users,follower_users,relevant_users)
+            
+            posts = Post.objects.filter(author__id__in=relevant_users).order_by('-created_at')
+            
+            serializer =PostListSerializer(posts, many=True,context={'request': request},)
+            
+            return Response({"status":1,"data":serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status": 0, "errors": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -82,6 +104,23 @@ class Like_dislikePostView(APIView):
                 return Response({"status": 0,"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"status": 0, "errors": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+        
+        
+class ListlikedusesForPostView(APIView):
+    permission_classes = [IsAuthenticated]  # Adjust as needed (e.g., require authentication)
+
+    def get(self, request, post_id, *args, **kwargs): 
+        try:
+            post = Post.objects.get(id=post_id)
+            liked_users = post.liked_by.all()
+            serializer = UserSerializer(liked_users, many=True)
+            
+            
+            return Response({"status": 1,"data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"status": 0, "errors": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+        
+        
         
         
         
