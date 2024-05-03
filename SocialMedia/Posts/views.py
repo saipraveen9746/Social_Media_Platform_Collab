@@ -65,16 +65,14 @@ class DeletePostView(APIView):
         try:
             post = Post.objects.get(pk=pk)
 
-            if post.author == request.user:  # Permission check
-                post.delete()  # Delete the comment
+            if post.author == request.user:  
+                post.delete() 
                 return Response({"status": 1,"message": "post deleted successfully."}, status=status.HTTP_200_OK)
             
             else:
-                # User is not authorized to delete the comment
                 return Response({"status": 0,"error": "You do not have permission to delete this post."}, status=status.HTTP_403_FORBIDDEN)
 
         except Comment.DoesNotExist:
-            # If the comment does not exist
             return Response({"status": 0,"error": "post not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -82,7 +80,7 @@ class DeletePostView(APIView):
         
         
 class Like_dislikePostView(APIView):
-    permission_classes = [IsAuthenticated]  # Only authenticated users can like posts
+    permission_classes = [IsAuthenticated]  
 
     def post(self, request):
         try:
@@ -92,11 +90,10 @@ class Like_dislikePostView(APIView):
                 user = request.user
                 existing_like = Like.objects.filter(user=user, post=post).first()         
                 if existing_like:
-                    # If the user already likes the post, delete the like (dislike)
                     existing_like.delete()
                     return Response({"status": 1,"message": "Post disliked successfully."}, status=status.HTTP_200_OK)
                 else:
-                    # If the user doesn't like the post, create a new like
+                   
                     Like.objects.create(user=user, post=post)
                     return Response({"status": 1,"message": "Post liked successfully."}, status=status.HTTP_201_CREATED)
             
@@ -107,7 +104,7 @@ class Like_dislikePostView(APIView):
         
         
 class ListlikedusesForPostView(APIView):
-    permission_classes = [IsAuthenticated]  # Adjust as needed (e.g., require authentication)
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request, post_id, *args, **kwargs): 
         try:
@@ -150,25 +147,25 @@ class DeleteCommentView(APIView):
         try:
             comment = Comment.objects.get(pk=pk)
 
-            if comment.user == request.user or comment.post.author == request.user:  # Permission check
-                comment.delete()  # Delete the comment
+            if comment.user == request.user or comment.post.author == request.user:  
+                comment.delete()  
                 return Response({"status": 1,"message": "Comment deleted successfully."}, status=status.HTTP_200_OK)
             
             else:
-                # User is not authorized to delete the comment
+                
                 return Response({"status": 0,"error": "You do not have permission to delete this comment."}, status=status.HTTP_403_FORBIDDEN)
 
         except Comment.DoesNotExist:
-            # If the comment does not exist
+            
             return Response({"status": 0,"error": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
         
         
 class ListCommentsForPostView(APIView):
-    permission_classes = [IsAuthenticated]  # Adjust as needed (e.g., require authentication)
+    permission_classes = [IsAuthenticated]  
 
     def get(self, request, post_id, *args, **kwargs):
         try:
-            comments = Comment.objects.filter(post_id=post_id).order_by('created_at')  # Order by creation date
+            comments = Comment.objects.filter(post_id=post_id).order_by('created_at')  
             
             serializer = CommentListSerializer(comments,many=True,context={'request': request},)
             return Response({"status": 1,"data": serializer.data}, status=status.HTTP_200_OK)

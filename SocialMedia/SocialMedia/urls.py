@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('Account.urls')),
     path('',include('Posts.urls')),
+    path('',include('Chat.urls'))
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
