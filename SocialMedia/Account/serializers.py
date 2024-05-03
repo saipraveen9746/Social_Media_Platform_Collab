@@ -5,6 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import CustomUser
 
 
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password_complexity])
     email = serializers.EmailField(required=True, validators=[validate_email])
@@ -12,7 +13,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     image=serializers.ImageField(max_length=None,use_url=True,required=False)
     class Meta:
         model = CustomUser
-        fields = ['username', 'email','password','image']
+        fields = ['id','username', 'email','password','image',]
 
     def create(self, validated_data):
         user=CustomUser.objects.create(username=validated_data['username'],email=validated_data['email'])
@@ -29,7 +30,6 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # adding custom claims
         token['username'] = user.username
         token["email"] = user.email
         return token
@@ -41,10 +41,31 @@ class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["email"] = user.email
         return data
 
-class FollowerSerializer(serializers.ModelSerializer):
+class FollowersSerializer(serializers.ModelSerializer):
     class Meta:
         model= CustomUser
         fields=[]
 
 
-        
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'email', 'username', 'image', 'is_active', 'is_admin')
+
+
+class FollowerSerializer(serializers.ModelSerializer):
+    follower = CustomUserSerializer(many=True)  
+
+    class Meta:
+        model = CustomUser
+        fields = ('follower',)
+
+
+class FollowingSerializer(serializers.ModelSerializer):
+    following = CustomUserSerializer(many=True) 
+
+    class Meta:
+        model = CustomUser
+        fields = ('following',)
+
+

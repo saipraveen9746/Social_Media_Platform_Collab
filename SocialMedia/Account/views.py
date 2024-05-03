@@ -3,11 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import FollowerSerializer,UserRegistrationSerializer,UserTokenObtainPairSerializer
+from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions,viewsets
 # Create your views here.
 
 
@@ -59,7 +60,7 @@ class UserProfileAPIView(APIView):
 
 class CreateFollower(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = FollowerSerializer
+    serializer_class = FollowersSerializer
 
     def create(self, request, *args, **kwargs):
         try:
@@ -80,4 +81,43 @@ class CreateFollower(generics.CreateAPIView):
 
 
 
+class UserFollowingList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request,*args,**kwargs):
+        try:
+            following_users = request.user.following.all()
+            serializer = UserRegistrationSerializer(following_users,many=True)
+            return Response({'status':1,'data':serializer.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0,'errors':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class UserFollowerList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self,request,*args,**kwargs):
+        try:
+            follower_users = request.user.follower.all()
+            serializer = UserRegistrationSerializer(follower_users,many=True)
+            return Response({'status':1,'data':serializer.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0,'errors':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CustomUserList(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+class FollowersList(generics.ListAPIView):
+    serializer_class = FollowerSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return CustomUser.objects.get(id=user_id).follower_profiles.all()
+    
+
+class FollowingList(generics.ListAPIView):
+    serializer_class = FollowingSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return CustomUser.objects.get(id=user_id).following_profiles.all()
