@@ -11,9 +11,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[validate_email])
     username = serializers.CharField(required=True, validators=[validate_username])
     image=serializers.ImageField(max_length=None,use_url=True,required=False)
+    # follower_count = serializers.SerializerMethodField()
+    # folllowing_count = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ['id','username', 'email','password','image',]
+        fields = ['id','username', 'email','password','image','follower_count','following_count']
 
     def create(self, validated_data):
         user=CustomUser.objects.create(username=validated_data['username'],email=validated_data['email'])
@@ -22,6 +24,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user.image = validated_data['image']
         user.save()
         return user
+    def get_follower_count(self, obj):
+        return obj.follower.count() 
+    def get_following_count(self,obj):
+        return obj.following.count()
     
     
     
