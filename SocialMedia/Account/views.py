@@ -104,8 +104,21 @@ class UserFollowerList(APIView):
 
 
 class CustomUserList(generics.ListAPIView):
-    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()
+        if CustomUser.is_admin:
+            queryset = queryset.exclude(is_admin=True)
+        return queryset
+    def list(self,request,*args,**kwargs):
+        try:
+            queryset=self.get_queryset()
+            serializer = self.get_serializer(queryset,many=True)
+            return Response({'status':1,'data':serializer.data})
+        except CustomUser.DoesNotExist:
+            return Response({'status':0,"error":"CustomUser Does not Exist"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response ({'status':0,"error": "An error occurred"}, status=500)
 
 class FollowersList(generics.ListAPIView):
     serializer_class = FollowerSerializer
@@ -113,6 +126,18 @@ class FollowersList(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return CustomUser.objects.get(id=user_id).follower_profiles.all()
+    def list(self,request,*args,**kwargs):
+        try:
+            queryset = self.get_queryset()
+            if queryset.exists():
+                serializer = self.get_serializer(queryset,many=True)
+                return Response({'status':1,'data':serializer.data})
+            else:
+                return Response ({'status':0,'error':'no followers'})
+        except CustomUser.DoesNotExist:
+            return Response({'status':0,'error':'User not found'},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'status':0,'error':'An error occured:{}'.format (str(e))}, status=500)
     
 
 class FollowingList(generics.ListAPIView):
@@ -121,3 +146,16 @@ class FollowingList(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return CustomUser.objects.get(id=user_id).following_profiles.all()
+    def list(self,request,*args,**kwargs):
+        try:
+            queryset = self.get_queryset()
+            if queryset.exists():
+                serializer = self.get_serializer(queryset,many=True)
+                return Response({'status':1,'data':serializer.data})
+            else:
+                return Response({'status':0,'error':'no following'})
+        except CustomUser.DoesNotExist:
+            return Response({'status':0,'error':'user not found'},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response ({'status':0,'error':'An error occured:{}'.format (str(e))}, status=500)
+        
