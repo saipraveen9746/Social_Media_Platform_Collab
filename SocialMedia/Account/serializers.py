@@ -3,7 +3,7 @@ from .models import *
 from .validators import validate_password_complexity,validate_email,validate_username
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import CustomUser
-
+from django.contrib.auth.models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     # folllowing_count = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ['id','username', 'email','password','image','follower_count','following_count']
+        fields = ['id','username', 'email','password','image','follower_count','following_count','name','dob','location','phone_number']
 
     def create(self, validated_data):
         user=CustomUser.objects.create(username=validated_data['username'],email=validated_data['email'])
@@ -75,3 +75,12 @@ class FollowingSerializer(serializers.ModelSerializer):
         fields = ('following',)
 
 
+class BioUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['name','dob','phone_number','location']
+
+        def create(self, validated_data):
+            user = self.context['request'].user
+            validated_data['user'] = user
+            return super().create(validated_data)

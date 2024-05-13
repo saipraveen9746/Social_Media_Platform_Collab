@@ -3,12 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer
+from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
+from rest_framework.decorators import action,api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import permissions,viewsets
+
 # Create your views here.
 
 
@@ -158,4 +159,18 @@ class FollowingList(generics.ListAPIView):
             return Response({'status':0,'error':'user not found'},status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response ({'status':0,'error':'An error occured:{}'.format (str(e))}, status=500)
-        
+
+
+
+
+class CreateBioView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self,request,*args, **kwargs):
+        serializer = BioUpdateSerializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = request.user
+            user.fill_bio(**serializer._validated_data)
+            return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0},status=status.HTTP_400_BAD_REQUEST)

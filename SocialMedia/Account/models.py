@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from django.forms import ValidationError
+import phonenumbers
 
 
 class CustomUserManager(BaseUserManager):
@@ -30,6 +32,14 @@ class CustomUser(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     follower = models.ManyToManyField('self',related_name='following_profiles',blank=True,symmetrical=False)
     following = models.ManyToManyField('self',related_name='follower_profiles',blank=True,symmetrical=False)
+    name = models.CharField(max_length=200,null=True)
+    dob = models.DateField(null=True)
+    phone_number = models.CharField(max_length=20,null=True)
+    location = models.CharField(max_length=200,null=True)
+
+
+
+
 
     objects = CustomUserManager()
 
@@ -52,11 +62,24 @@ class CustomUser(AbstractBaseUser):
         return self.following.count()
     def following_names(self):
         return [user.username for user in self.following.all()]
+    def clean(self):
+        super().clean()
+        try:
+            parsed_number = phonenumbers.parse(self.phone_number, None)
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise ValidationError("Invalid phone number")
+        except phonenumbers.phonenumberutil.NumberParseException:
+            raise ValidationError("Invalid phone number format")
 
 
     @property
     def is_staff(self):
         return self.is_admin
         
+    def fill_bio(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        self.save()
+
 
 
