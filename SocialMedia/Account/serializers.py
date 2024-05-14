@@ -4,6 +4,7 @@ from .validators import validate_password_complexity,validate_email,validate_use
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import CustomUser
 from django.contrib.auth.models import User
+from phonenumbers import parse,is_valid_number,NumberParseException
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -76,11 +77,15 @@ class FollowingSerializer(serializers.ModelSerializer):
 
 
 class BioUpdateSerializer(serializers.ModelSerializer):
+    def validate_phone_number(self, value):
+        try:
+            parsed_number = parse(value, None) 
+            if not is_valid_number(parsed_number):
+                raise serializers.ValidationError("Invalid phone number")
+        except NumberParseException:
+            raise serializers.ValidationError("Invalid phone number format")
+        return value
     class Meta:
         model = CustomUser
         fields = ['name','dob','phone_number','location']
 
-        def create(self, validated_data):
-            user = self.context['request'].user
-            validated_data['user'] = user
-            return super().create(validated_data)
