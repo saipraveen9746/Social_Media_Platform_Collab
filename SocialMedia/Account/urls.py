@@ -14,11 +14,12 @@ urlpatterns = [
     path('users/', CustomUserList.as_view(), name='user-list'),
     path('users/<int:user_id>/followers/', FollowersList.as_view(), name='followers-list'),
     path('users/<int:user_id>/following/', FollowingList.as_view(), name='following-list'),
-    path('createbio/',CreateBioView.as_view(),name='create-bio')
+    path('updatebio/',UpdateBioView.as_view(),name='create-bio')
 
     
 
 
+    
     
 ]
 

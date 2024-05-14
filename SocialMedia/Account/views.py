@@ -161,16 +161,19 @@ class FollowingList(generics.ListAPIView):
             return Response ({'status':0,'error':'An error occured:{}'.format (str(e))}, status=500)
 
 
-
-
-class CreateBioView(APIView):
+class UpdateBioView(APIView):
     permission_classes = [IsAuthenticated]
-    def post(self,request,*args, **kwargs):
-        serializer = BioUpdateSerializer(data=request.data)
+
+    def patch(self, request, *args, **kwargs):
         try:
-            serializer.is_valid(raise_exception=True)
             user = request.user
-            user.fill_bio(**serializer._validated_data)
-            return Response({'status':1,'data':serializer.data}, status=status.HTTP_200_OK)
+            serializer = BioUpdateSerializer(instance=user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({'status': 1, 'data': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({'status':0},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 0}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        
