@@ -32,6 +32,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    # 'daphne',
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'Account','Posts','Chat',
     'rest_framework_simplejwt',
+    'django_filters',
     'corsheaders'
 ]
 
@@ -62,7 +65,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,6 +78,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SocialMedia.wsgi.application'
+# ASGI_APPLICATION = 'SocialMedia.asgi.application'
+
 
 
 # Database
@@ -136,6 +140,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 AUTH_USER_MODEL = 'Account.CustomUser'
 
 REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}
+
+
+REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
          
@@ -143,6 +152,6 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=600),  # Set the access token lifetime
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),  # Set the refresh token lifetime to 7 days
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),  
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),  
 }

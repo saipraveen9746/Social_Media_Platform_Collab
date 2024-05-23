@@ -89,3 +89,10 @@ class BioUpdateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['name','dob','phone_number','location']
 
+
+class SearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username','name','image']
+
+
