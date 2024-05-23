@@ -61,6 +61,7 @@ class MessageListAPIView(generics.ListCreateAPIView):
 
 class MessageSenderListView(generics.ListAPIView):
     serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         try:

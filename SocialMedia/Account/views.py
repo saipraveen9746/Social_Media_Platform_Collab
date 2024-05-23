@@ -3,12 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer
+from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer,SearchSerializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action,api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import permissions,viewsets
+from django_filters import rest_framework as filters
 
 # Create your views here.
 
@@ -175,5 +176,18 @@ class UpdateBioView(APIView):
             return Response({'status': 0}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserFilter(filters.FilterSet):
+    username = filters.CharFilter(lookup_expr='icontains')
+    image = filters.CharFilter(lookup_expr='icontains')
 
+    class Meta:
+        model = CustomUser
+        fields = ['username','image']
+
+class UserSearchlistView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = CustomUser.objects.all()
+    serializer_class = SearchSerializer
+    filter_backends =(filters.DjangoFilterBackend,)
+    filterset_class = UserFilter
         
