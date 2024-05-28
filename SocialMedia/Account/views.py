@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer,SearchSerializer
+from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer,SearchSerializer,UserUpdateSerializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action,api_view
@@ -178,11 +178,11 @@ class UpdateBioView(APIView):
 
 class UserFilter(filters.FilterSet):
     username = filters.CharFilter(lookup_expr='icontains')
-    image = filters.CharFilter(lookup_expr='icontains')
+
 
     class Meta:
         model = CustomUser
-        fields = ['username','image']
+        fields = ['username']
 
 class UserSearchlistView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -190,4 +190,13 @@ class UserSearchlistView(generics.ListAPIView):
     serializer_class = SearchSerializer
     filter_backends =(filters.DjangoFilterBackend,)
     filterset_class = UserFilter
-        
+
+
+
+class UserUpdateView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user

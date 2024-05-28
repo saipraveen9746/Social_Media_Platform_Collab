@@ -96,3 +96,9 @@ class SearchSerializer(serializers.ModelSerializer):
         fields = ['username','name','image']
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username','image','name','dob','location','phone_number']
+        read_only_fields = ['email']
+        

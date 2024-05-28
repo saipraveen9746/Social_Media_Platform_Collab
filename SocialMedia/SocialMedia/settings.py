@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'Account','Posts','Chat',
+    'Account','Posts','Chat','story',
     'rest_framework_simplejwt',
     'django_filters',
     'corsheaders'
