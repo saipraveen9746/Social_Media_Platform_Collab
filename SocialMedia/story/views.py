@@ -52,9 +52,19 @@ class StoryListCreateApiView(generics.ListCreateAPIView):
 
 
 class StoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Story.objects.all()
     serializer_class = StorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]    
+    def get_queryset(self):
+        return Story.objects.all()
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response({'status':1,'story':serializer.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0,'error':str(e)},status=status.HTTP_400_BAD_REQUEST) 
+        
+        
 
 class DeleteStory(APIView):
     permission_classes = [IsAuthenticated]
@@ -68,3 +78,5 @@ class DeleteStory(APIView):
                 return Response({'status':0,'error':'you do not have permission to delete this story.'},status=status.HTTP_403_FORBIDDEN)
         except Story.DoesNotExist:
             return Response({'status':0,'error':'story not found'},status=status.HTTP_404_NOT_FOUND)
+        
+
