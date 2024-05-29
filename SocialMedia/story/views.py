@@ -23,22 +23,48 @@ class StoryListCreateApiView(generics.ListCreateAPIView):
         following_users = user.following.all()
         now = timezone.now()
         return Story.objects.filter(author__in=following_users, created_at__gte=now - timedelta(hours=24))
-
+    
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+        except Exception as e:
+            return Response({'status': 0, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response({'status': 1, 'message': 'Story created successfully', 'story': serializer.data}, status=status.HTTP_201_CREATED, headers=headers)
+    
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        try:
+            serializer.save(author=self.request.user)
+        except Exception as e:
+            raise e 
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response({'status': 1, 'stories': serializer.data}, status=status.HTTP_200_OK)
+        try:
+            queryset = self.get_queryset()
+            serializer = self.serializer_class(queryset, many=True)
+            return Response({'status': 1, 'stories': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 0, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Story.objects.all()
     serializer_class = StorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]    
-
-
+    def get_queryset(self):
+        return Story.objects.all()
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response({'status':1,'story':serializer.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0,'error':str(e)},status=status.HTTP_400_BAD_REQUEST) 
+        
+        
 
 class DeleteStory(APIView):
     permission_classes = [IsAuthenticated]
@@ -52,3 +78,5 @@ class DeleteStory(APIView):
                 return Response({'status':0,'error':'you do not have permission to delete this story.'},status=status.HTTP_403_FORBIDDEN)
         except Story.DoesNotExist:
             return Response({'status':0,'error':'story not found'},status=status.HTTP_404_NOT_FOUND)
+        
+
