@@ -87,7 +87,7 @@ class BioUpdateSerializer(serializers.ModelSerializer):
         return value
     class Meta:
         model = CustomUser
-        fields = ['name','dob','phone_number','location']
+        fields = ['name','dob','phone_number','location','image']
 
 
 class SearchSerializer(serializers.ModelSerializer):
