@@ -91,14 +91,15 @@ class BioUpdateSerializer(serializers.ModelSerializer):
 
 
 class SearchSerializer(serializers.ModelSerializer):
+    is_following = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ['id','username','name','image']
+        fields = ['id', 'username', 'name', 'image', 'is_following']
 
+    def get_is_following(self, obj):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            return request.user.following_profiles.filter(id=obj.id).exists()
+        return False
 
-class UserUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['username','image','name','dob','location','phone_number']
-        read_only_fields = ['email']
-        

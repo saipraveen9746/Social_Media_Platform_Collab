@@ -80,3 +80,20 @@ class DeleteStory(APIView):
             return Response({'status':0,'error':'story not found'},status=status.HTTP_404_NOT_FOUND)
         
 
+
+class UserStoryList(generics.ListAPIView):
+    serializer_class = StorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        now = timezone.now()  # Call the function to get the current time
+        return Story.objects.filter(author=self.request.user, created_at__gte=now - timedelta(hours=24)).order_by('-created_at')
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            serializer = self.get_serializer(queryset, many=True)
+            return Response({'status':1,'story':serializer.data} ,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status':0,'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+      
