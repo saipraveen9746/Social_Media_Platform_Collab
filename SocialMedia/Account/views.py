@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import CustomUser
-from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer,SearchSerializer,UserUpdateSerializer
+from .serializers import FollowersSerializer, FollowersSerializer, FollowingSerializer, UserRegistrationSerializer,UserTokenObtainPairSerializer,CustomUserSerializer,FollowerSerializer,BioUpdateSerializer,SearchSerializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action,api_view
@@ -191,12 +191,10 @@ class UserSearchlistView(generics.ListAPIView):
     filter_backends =(filters.DjangoFilterBackend,)
     filterset_class = UserFilter
 
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()
+        return queryset
+    
 
 
-class UserUpdateView(generics.UpdateAPIView):
-    queryset = CustomUser.objects.all()
-    serializer_class = UserUpdateSerializer
-    permission_classes = [IsAuthenticated]
 
-    def get_object(self):
-        return self.request.user
