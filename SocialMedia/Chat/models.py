@@ -12,3 +12,6 @@ class Message(models.Model):
 
     def _str_(self):
         return f"From: {self.sender} - To: {self.receiver}"
+    
+
+

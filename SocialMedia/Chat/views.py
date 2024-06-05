@@ -51,7 +51,7 @@ class MessageListAPIView(generics.ListCreateAPIView):
             user = self.request.user
             receiver_id = self.kwargs.get('receiver_id')
             queryset= models.Message.objects.filter(sender=user, receiver_id=receiver_id) | \
-                      models.Message.objects.filter(sender_id=receiver_id, receiver=user)
+                      models.Message.objects.filter(sender_id=receiver_id, receiver=user).order_by('-timestamp')
             return queryset
         except Exception as e:
             raise NotFound(detail='Messages not found receiver this user')
