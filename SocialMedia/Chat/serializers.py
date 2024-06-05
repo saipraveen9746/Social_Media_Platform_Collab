@@ -22,5 +22,12 @@ class MessageListSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username']
+        fields = ['id', 'username','image']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if representation.get('image'):
+            representation['image'] = representation['image'].replace('http://127.0.0.1:8000', '')
+        return representation
+
 
