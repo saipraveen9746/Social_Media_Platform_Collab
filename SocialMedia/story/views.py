@@ -86,7 +86,7 @@ class UserStoryList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        now = timezone.now()  # Call the function to get the current time
+        now = timezone.now() 
         return Story.objects.filter(author=self.request.user, created_at__gte=now - timedelta(hours=24)).order_by('-created_at')
     
     def get(self, request, *args, **kwargs):
