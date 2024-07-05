@@ -51,7 +51,7 @@ class MessageListAPIView(generics.ListCreateAPIView):
             user = self.request.user
             receiver_id = self.kwargs.get('receiver_id')
             queryset= models.Message.objects.filter(sender=user, receiver_id=receiver_id) | \
-                      models.Message.objects.filter(sender_id=receiver_id, receiver=user).order_by('timestamp')
+                      models.Message.objects.filter(sender_id=receiver_id, receiver=user).order_by('-timestamp')
             return queryset
         except Exception as e:
             raise NotFound(detail='Messages not found receiver this user')
@@ -66,8 +66,16 @@ class MessageSenderListView(generics.ListAPIView):
     def get_queryset(self):
         try:
             current_user = self.request.user 
-            queryset=CustomUser.objects.filter(sent_messages__receiver=current_user).distinct()
-            return queryset
+            queryset = CustomUser.objects.filter(
+                # Users who sent messages to the current_user
+                sent_messages__receiver=current_user
+                # OR
+            ).distinct() | CustomUser.objects.filter(
+                # Users who received messages from the current_user
+                received_messages__sender=current_user
+            ).distinct()
+            print(queryset)
+            return queryset.distinct()
         except Exception as e:
             return Response({'status':0,'error':'error occured while rertrieving message senders'},status=status.HTTP_404_NOT_FOUND)
 
